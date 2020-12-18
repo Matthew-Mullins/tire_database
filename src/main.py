@@ -35,7 +35,7 @@ Status(
 class TireFrame(tk.Frame):
     def __init__(self, master, tire):
         tk.Frame.__init__(self, master)
-        self.configure(bd=2, relief=tk.GROOVE)
+        self.configure(bd=2, relief=tk.GROOVE, width=1200)
         self.tire = tire
         self.create_frame()
 
@@ -76,8 +76,8 @@ class TireFrame(tk.Frame):
         for x in range(5):
             tk.Grid.columnconfigure(self, x, weight=1)
 
-        for y in range(4):
-            tk.Grid.rowconfigure(self, y, weight=1)
+        # for y in range(4):
+        #     tk.Grid.rowconfigure(self, y, weight=1)
 
 class Application(tk.Frame):
     def __init__(self, master):
@@ -86,8 +86,26 @@ class Application(tk.Frame):
         self.pack(expand=True, fill=tk.BOTH)
 
     def initialize(self):
-        tire_frame = TireFrame(self, None)
-        tire_frame.pack(expand=True, fill=tk.X)
+        canvas = tk.Canvas(self)
+        scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=canvas.yview)
+        frame_scrollable = ttk.Frame(canvas)
+        frame_scrollable.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+        canvas.create_window((0, 0), window=frame_scrollable, anchor=tk.NW)
+        canvas.update_idletasks()
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        for _ in range(10):
+            tire_frame = TireFrame(frame_scrollable, None)
+            tire_frame.configure(width=800)
+            tire_frame.pack(side=tk.TOP)
+
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=False)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def run(self):
         self.master.mainloop()
